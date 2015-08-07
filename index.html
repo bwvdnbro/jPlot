@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>jPlot example</title>
+  <!-- Includes:
+         - d3: library used to dynamically load data and create svg elements
+         - mathjax: library used to dynamically compile TeX
+         - jplot: the actual jPlot library
+  -->
+  <script src="d3.min.js" charset="utf-8"></script>
+  <script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/javascript" src="jplot.min.js"></script>
+</head>
+<body>
+<!-- the plot script -->
+<script type="text/javascript" charset="utf-8">
+// create a figure (creates a div-container with the same parent node as the
+// script where the figure will be stored in)
+fig = new Figure(800, 600);
+// create a plot inside the figure
+plot = fig.create_plot();
+// load some example data
+plot.load_data("btfr.tsv");
+// setup some symbol, style and color information for the data
+var resolutions = {"L": "x", "H": "z"};
+var rotations = {"R00": "o", "R05": "s", "R10": "^"};
+var simulations = {"C1P1": "r", "C2P1": "b", "C3P1": "g", "C3P2": "a",
+                   "C3P3": "k", "C4P2": "y", "C7P4": "l", "C7P6": "d",
+                   "C7P7": "q", "C9P8": "p", "C9P9": "c", "CaPa": "e",
+                   "CbPc": "m", "CcPd": "t", "C1P1bis": "n"};
+
+// filter out 0 values, they are never shown
+plot.filter("vc_star", 0);
+plot.filter("Mb", 0);
+// tell the plot we want to use a loglog window with limits that can hold all
+// the simulations
+plot.set_limits("vc_star", "Mb", true, true);
+// loop over the different parameters and make plots with different properties
+for(var res in resolutions){
+    for(var sim in simulations){
+        for(var rot in rotations){
+            // clear the previous filter
+            plot.clear_filter();
+            // filter out 0 values
+            plot.filter("vc_star", 0);
+            plot.filter("Mb", 0);
+            // select simulations with the desired resolution
+            // this works since L or H are only present at the end of the sim
+            // string, alternatively C.P.*M.R..L or C.P.*M.R..H would also work
+            plot.filter("sim", res);
+            // select simulations with the desired model
+            plot.filter("sim", sim);
+            // select simulations with the desired rotation
+            plot.filter("sim", rot);
+            // plot the filtered data
+            plot.loglog("vc_star", "Mb", simulations[sim] + resolutions[res] + rotations[rot]);
+        }
+    }
+}
+// set the labels. The text in between \\( and \\) is parsed as tex by MathJax
+plot.set_xlabel("\\(v_c\\) (km/s)");
+plot.set_ylabel("\\(M_b\\) (M\\(_\\odot\\))");
+</script>
+</body>
+</html>
